@@ -1,0 +1,100 @@
+plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'io.franzbecker.gradle-lombok' version '5.0.0'
+    id 'com.github.ben-manes.versions' version '0.41.0'
+    id 'com.github.jk1.dependency-license-report' version '2.0'
+}
+
+description = 'R2DBC driver for DB2/UDB'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+lombok.version = '1.18.22'
+
+dependencies {
+    // The SPI we're implementing
+    // https://mvnrepository.com/artifact/io.r2dbc/r2dbc-spi License: Apache 2.0
+    api 'io.r2dbc:r2dbc-spi:0.8.6.RELEASE'
+    // The underlying Vert.X driver implementation
+    // https://mvnrepository.com/artifact/io.vertx/vertx-db2-client License: Apache 2.0
+    implementation 'io.vertx:vertx-db2-client:4.2.3'
+    // We use Project Reactor's Mono/Flux to implement the Reactive Streams interfaces used in the R2DBC SPI
+    // https://mvnrepository.com/artifact/io.projectreactor/reactor-core License: Apache 2.0
+    implementation 'io.projectreactor:reactor-core:3.4.14'
+    // Logging via SLF4J
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api License: MIT
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    // Async Semaphore implementation, used by ReactiveSemaphore particularly for synchronizing transaction state
+    // https://mvnrepository.com/artifact/com.ibm.async/asyncutil License: Apache 2.0
+    implementation 'com.ibm.async:asyncutil:0.1.0'
+    // Spring Data dialect support is optional - we don't bring Spring along in our dependency tree
+    // https://mvnrepository.com/artifact/org.springframework.data/spring-data-r2dbc License: Apache 2.0
+    compileOnly 'org.springframework.data:spring-data-r2dbc:1.4.0'
+    // @AutoService annotation for ConnectionFactoryProvider
+    // https://mvnrepository.com/artifact/com.google.auto.service/auto-service License: Apache 2.0
+    compileOnly 'com.google.auto.service:auto-service:1.0.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
+    // The SPI's Technology Compatibility Kit
+    // https://mvnrepository.com/artifact/io.r2dbc/r2dbc-spi-test License: Apache 2.0
+    testImplementation 'io.r2dbc:r2dbc-spi-test:0.8.6.RELEASE'
+    // The TCK needs us to provide a Spring JDBC "JdbcOperations" instance for creating tables, etc.
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jdbc License: Apache 2.0
+    testImplementation 'org.springframework.boot:spring-boot-starter-jdbc:2.6.2'
+    // Used to validate our Spring R2DBC dialect
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-r2dbc License: Apache 2.0
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-r2dbc:2.6.2'
+    // Used to validate our Spring R2DBC dialect
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test License: Apache 2.0
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.2'
+    // We use Project Reactor's Mono/Flux to implement the Reactive Streams interfaces used in the R2DBC SPI
+    // https://mvnrepository.com/artifact/io.projectreactor/reactor-test License: Apache 2.0
+    testImplementation 'io.projectreactor:reactor-test:3.4.14'
+
+
+    // https://mvnrepository.com/artifact/com.ibm.db2/jcc License: International Program License Agreement (IPLA)
+    testImplementation 'com.ibm.db2:jcc:11.5.7.0'
+
+    // https://mvnrepository.com/artifact/org.testcontainers/db2 License: MIT
+    testImplementation 'org.testcontainers:db2:1.16.2'
+    // https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter License: MIT
+    testImplementation 'org.testcontainers:junit-jupiter:1.16.2'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events = [ 'STARTED', 'FAILED', 'SKIPPED']
+        exceptionFormat = 'full'
+        showStandardStreams = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.75
+            }
+        }
+    }
+}
+
+dependencyUpdates {
+    revision = "release"
+    outputDir = project.buildDir.toString() + "/reports/dependency-updates"
+    outputFormatter = "test,json"
+}
+
+licenseReport {
+    // Use 'ALL' to dynamically resolve all configurations:
+    configurations = ALL
+}

@@ -1,0 +1,4 @@
+org.springframework.data.r2dbc.dialect.DialectResolver$R2dbcDialectProvider=\
+  com.usaa.reactive.r2dbc.spring.DB2R2dbcDialect$Provider
+org.springframework.r2dbc.core.binding.BindMarkersFactoryResolver$BindMarkerFactoryProvider=\
+  com.usaa.reactive.r2dbc.spring.DB2R2dbcDialect$Provider
